@@ -1,10 +1,10 @@
 class Stern < Formula
   desc "Tail multiple Kubernetes pods & their containers"
-  homepage "https://github.com/wercker/stern"
-  url "https://github.com/wercker/stern/archive/1.11.0.tar.gz"
+  homepage "https://github.com/stern/stern"
+  url "https://github.com/stern/stern/archive/1.12.1.tar.gz"
   sha256 "d6f47d3a6f47680d3e4afebc8b01a14f0affcd8fb625132af14bb77843f0333f"
   license "Apache-2.0"
-  head "https://github.com/wercker/stern.git",
+  head "https://github.com/stern/stern.git",
     shallow: false
 
   bottle do
@@ -16,22 +16,11 @@ class Stern < Formula
   end
 
   depends_on "go" => :build
-  depends_on "govendor" => :build
 
   def install
-    contents = Dir["{*,.git,.gitignore}"]
-    gopath = buildpath/"gopath"
-    (gopath/"src/github.com/wercker/stern").install contents
-
-    ENV["GOPATH"] = gopath
-    ENV.prepend_create_path "PATH", gopath/"bin"
-
-    cd gopath/"src/github.com/wercker/stern" do
-      system "govendor", "sync"
-      system "go", "build", "-o", "bin/stern"
-      bin.install "bin/stern"
-      prefix.install_metafiles
-    end
+    system "go", "build", "-ldflags",
+             "-s -w -X github.com/stern/stern/cli.version=#{version} -X github.com/stern/stern/cli.commit=#{stable.specs[:revision]}",
+             *std_go_args
   end
 
   test do
